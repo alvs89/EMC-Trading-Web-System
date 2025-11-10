@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Create Account — E.M. Cayetano</title>
+	<link rel="stylesheet" href="styles.css">
+	<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+	<div class="hero">
+		<div class="left">
+			<div class="card">
+				<div class="logo"><img src="assets/logo.png" alt="E.M. Cayetano logo"></div>
+				<h2>Create Account</h2>
+				<p class="muted">Register for E.M. Cayetano Inventory System</p>
+
+				<form id="regForm" class="reg-form" action="#" method="post">
+					<label for="firstname">First Name</label>
+					<input id="firstname" name="firstname" type="text" placeholder="Juan " required>
+
+                    <label for="lastname">Last Name</label>
+					<input id="lastname" name="lastname" type="text" placeholder="Dela Cruz" required>
+
+					<label for="username">Username</label>
+					<input id="username" name="username" type="text" placeholder="Choose a username" required>
+
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender" required>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="n/a">Prefer not to say</option>
+                    </select>
+
+					<label for="email">Email</label>
+					<input id="email" name="email" type="email" placeholder="your.email@example.com" required>
+
+					<label for="branch">Branch</label>
+					<select id="branch" name="branch" required>
+						<option value="">Select your branch</option>
+						<option>Manggahan</option>
+						<option>San Rafael</option>
+					</select>
+
+					<div class="note">Your account will be pending until approved by an administrator. You will receive an email once your account is activated.</div>
+
+					<!-- reCAPTCHA widget (site key is a placeholder) -->
+					<div class="captcha-wrap" style="margin-top:14px;margin-bottom:6px;">
+						<div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+					</div>
+
+					<button class="btn btn-primary" type="submit">Submit Registration</button>
+
+					<div class="back-link">← <a href="#">Back to Login</a></div>
+				</form>
+			</div>
+		</div>
+
+			<!-- Confirmation modal -->
+			<div id="modalOverlay" class="modal-overlay" aria-hidden="true">
+				<div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+					<h3 id="modalTitle">Registration submitted</h3>
+					<p class="muted">Your registration has been notified to the admin.</p>
+					<div class="message">An administrator will review your account and activate it if approved.</div>
+					<div class="summary-list">
+						<div class="summary-item"><strong>Name</strong><div id="sum-name"></div></div>
+						<div class="summary-item"><strong>Username</strong><div id="sum-username"></div></div>
+						<div class="summary-item"><strong>Gender</strong><div id="sum-gender"></div></div>
+						<div class="summary-item"><strong>Email</strong><div id="sum-email"></div></div>
+						<div class="summary-item"><strong>Branch</strong><div id="sum-branch"></div></div>
+					</div>
+					<div class="actions">
+						<button data-modal-close class="btn-secondary">Close</button>
+					</div>
+				</div>
+			</div>
+
+		<div class="right">
+			<div class="promo">
+				<h1>Join Our Team</h1>
+				<div class="accent"></div>
+				<p class="promo-text">Register for access to the E.M. Cayetano Trading Inventory System. Your account will be reviewed by our administrators before activation.</p>
+
+				<blockquote class="quote">"Become part of a reliable, professional team dedicated to excellence."</blockquote>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Basic client-side validation example + reCAPTCHA check
+		document.getElementById('regForm').addEventListener('submit', function(e){
+			const email = document.getElementById('email');
+			if (email && (!email.value.includes('@') || !email.value.includes('.'))){
+				alert('Please enter a valid email.');
+				e.preventDefault();
+				return;
+			}
+
+			// Check reCAPTCHA (v2) has been completed
+			if (typeof grecaptcha !== 'undefined'){
+				const resp = grecaptcha.getResponse();
+				if (!resp || resp.length === 0){
+					alert('Please complete the reCAPTCHA to prove you are not a robot.');
+					e.preventDefault();
+					return;
+				}
+			} else {
+				// grecaptcha not yet available (script may be loading). Prevent submission and ask user to wait.
+				alert('reCAPTCHA is still loading — please wait a moment and try again.');
+				e.preventDefault();
+				return;
+			}
+
+			// At this point validation and captcha are OK — show confirmation modal instead of submitting
+			e.preventDefault();
+			populateAndShowModal();
+		});
+
+		// Modal logic
+		function populateAndShowModal(){
+			const values = {
+				firstname: document.getElementById('firstname').value || '',
+				lastname: document.getElementById('lastname').value || '',
+				username: document.getElementById('username').value || '',
+				gender: document.getElementById('gender').value || '',
+				email: document.getElementById('email').value || '',
+				branch: document.getElementById('branch').value || ''
+			};
+
+			// Fill modal fields
+			document.getElementById('sum-name').textContent = values.firstname + ' ' + values.lastname;
+			document.getElementById('sum-username').textContent = values.username;
+			document.getElementById('sum-gender').textContent = values.gender;
+			document.getElementById('sum-email').textContent = values.email;
+			document.getElementById('sum-branch').textContent = values.branch;
+
+			// show modal
+			document.getElementById('modalOverlay').classList.add('show');
+		}
+
+		// Close modal handler — optionally reset form and recaptcha
+		document.addEventListener('click', function(ev){
+			if (ev.target && ev.target.matches('[data-modal-close]')){
+				document.getElementById('modalOverlay').classList.remove('show');
+				// reset form
+				document.getElementById('regForm').reset();
+				// reset reCAPTCHA if available
+				if (typeof grecaptcha !== 'undefined' && grecaptcha.reset) grecaptcha.reset();
+			}
+		});
+
+	</script>
+</body>
+</html>
+
