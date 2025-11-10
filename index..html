@@ -1,3 +1,15 @@
+<!--
+  index..html
+  Purpose: Main UI for the Inventory Management web app.
+  Contains:
+    - Header / page title
+    - Search + filter controls
+    - Inventory table (list of items)
+    - Dialogs: Add Item, Stock In, Stock Out
+  Notes:
+    - Styling uses Tailwind CDN for quick prototyping.
+    - lucide icons are initialized at the bottom of the page.
+-->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -108,12 +120,90 @@
       .font-semibold {
         font-weight: 600;
       }
+
+      /* Slightly compressed table: use fixed layout and fit to available width */
+      #inventory-table {
+        width: 100%;
+        table-layout: fixed; /* stable column widths; uses col widths / min-widths below */
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+
+      /* Reduce general cell padding so columns are closer */
+      #inventory-table th,
+      #inventory-table td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 8px 10px; /* smaller padding */
+        vertical-align: middle;
+        font-size: 13px;
+      }
+
+      /* Make Status column wrap and display two lines (status + reorder) */
+      #inventory-table th:nth-child(8),
+      #inventory-table td:nth-child(8) {
+        white-space: normal;
+        vertical-align: middle;
+      }
+
+      /* Stack status and reorder badge vertically */
+      .status-cell {
+        display: inline-flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: flex-start;
+        line-height: 1.05;
+      }
+
+      /* Column-specific minimum widths (compressed to fit typical viewport) */
+      #inventory-table th:nth-child(1),
+      #inventory-table td:nth-child(1) { min-width: 56px; }   /* ID */
+      #inventory-table th:nth-child(2),
+      #inventory-table td:nth-child(2) { min-width: 240px; }  /* Item Name */
+      #inventory-table th:nth-child(3),
+      #inventory-table td:nth-child(3) { min-width: 140px; }  /* Supplier */
+      #inventory-table th:nth-child(4),
+      #inventory-table td:nth-child(4) { min-width: 100px; }  /* Category */
+      #inventory-table th:nth-child(5),
+      #inventory-table td:nth-child(5) { min-width: 70px; }   /* Unit */
+      #inventory-table th:nth-child(6),
+      #inventory-table td:nth-child(6) { min-width: 70px; }   /* Quantity */
+      #inventory-table th:nth-child(7),
+      #inventory-table td:nth-child(7) { min-width: 90px; }   /* Reorder Level */
+      #inventory-table th:nth-child(8),
+      #inventory-table td:nth-child(8) { min-width: 100px; }  /* Status */
+      #inventory-table th:nth-child(9),
+      #inventory-table td:nth-child(9) { min-width: 100px; }  /* Last Updated */
+      #inventory-table th:nth-child(10),
+      #inventory-table td:nth-child(10) { min-width: 100px; } /* Image */
+      #inventory-table th:nth-child(11),
+      #inventory-table td:nth-child(11) { min-width: 90px; }  /* Actions */
+
+      /* Make image thumbnails smaller so they fit */
+      #inventory-table td img {
+        max-width: 80px;
+        max-height: 48px;
+        object-fit: cover;
+        border-radius: 4px;
+      }
+
+      /* Slightly tighter header style */
+      #inventory-table thead th {
+        background: #f8fafc;
+        z-index: 50;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        font-size: 12px;
+      }
     </style>
   </head>
   <body class="min-h-screen">
     <div id="toast-container"></div>
 
-    <div class="p-8 max-w-7xl mx-auto">
+    <!-- Page container: main content area -->
+    <div class="p-8 max-w-full mx-auto">
+      <!-- Header: title and short description -->
       <div class="mb-6 rounded-lg overflow-hidden shadow-xl">
         <div class="header-gradient p-8">
           <h1 class="text-3xl font-bold text-white">Inventory Management</h1>
@@ -123,9 +213,12 @@
         </div>
       </div>
 
+      <!-- Controls: Search box, Category filter, Add Item button -->
+      <!-- This section lets users quickly find items or filter by category -->
       <div class="mb-6 bg-white rounded-lg shadow-md border border-gray-200">
         <div class="p-4">
           <div class="flex flex-col md:flex-row gap-4">
+            <!-- Search input -->
             <div class="flex-1 relative">
               <i
                 data-lucide="search"
@@ -139,6 +232,7 @@
               />
             </div>
 
+            <!-- Category filter dropdown -->
             <div
               class="w-full md:w-48 relative flex items-center border border-gray-300 rounded-lg h-10 px-2 bg-white"
             >
@@ -151,6 +245,7 @@
               </select>
             </div>
 
+            <!-- Mobile add item button -->
             <button
               id="add-item-button"
               class="md:hidden flex items-center justify-center h-10 px-4 text-sm font-semibold rounded-lg text-white bg-slate-700 hover:bg-slate-800 transition-colors duration-200 shadow-md"
@@ -162,9 +257,9 @@
         </div>
       </div>
 
-      <div
-        class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden"
-      >
+      <!-- Inventory Table -->
+      <!-- Displays the list of inventory items with supplier, category, unit, stock, status, image and actions -->
+      <div class="bg-white rounded-lg shadow-md border border-gray-200">
         <div class="p-6 border-b border-gray-200">
           <div class="flex items-center justify-between">
             <div>
@@ -176,6 +271,7 @@
               </p>
             </div>
 
+            <!-- Desktop add item button -->
             <button
               id="add-item-button-desktop"
               class="hidden md:flex items-center h-10 px-4 text-sm font-semibold rounded-lg text-white bg-slate-700 hover:bg-slate-800 transition-colors duration-200 shadow-md"
@@ -186,38 +282,59 @@
           </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- Table wrapper: contains the table rows rendered by script.js -->
+        <div class="">
           <table
             class="min-w-full divide-y divide-gray-200"
             id="inventory-table"
           >
             <thead class="bg-gray-50">
-    <tr>
-        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            <button data-sort="id" class="sort-button flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors duration-150">
-                ID
-            </button>
-        </th>
-        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            <button data-sort="name" class="sort-button flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors duration-150">
-                Item Name
-            </button>
-        </th>
-        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</th>
-        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            <button data-sort="quantity" class="sort-button flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors duration-150">
-                Quantity
-            </button>
-        </th>
-        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            <button data-sort="lastUpdated" class="sort-button flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors duration-150">
-                Last Updated
-            </button>
-        </th>
-        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
-    </tr>
-</thead>
+              <tr>
+                <!-- Column headers (sorting applied via data-sort on buttons) -->
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <button data-sort="id" class="sort-button flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors duration-150">
+                    ID
+                  </button>
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <button data-sort="name" class="sort-button flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors duration-150">
+                    Item Name
+                  </button>
+                </th>
+
+                <!-- Supplier -->
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Supplier
+                </th>
+
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</th>
+
+                <!-- Unit -->
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Unit</th>
+
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <button data-sort="quantity" class="sort-button flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors duration-150">
+                    Quantity
+                  </button>
+                </th>
+
+                <!-- Reorder Level -->
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Reorder Level</th>
+
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <button data-sort="lastUpdated" class="sort-button flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors duration-150">
+                    Last Updated
+                  </button>
+                </th>
+
+                <!-- Image -->
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Image</th>
+
+                <!-- Actions -->
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
             <tbody
               class="bg-white divide-y divide-gray-200"
               id="inventory-table-body"
@@ -227,83 +344,148 @@
       </div>
     </div>
 
+    <!-- Add Item Dialog -->
+    <!-- Modal form used to add a new inventory item. Fields are validated in script.js -->
     <div
       id="add-item-dialog"
       class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden"
+      role="dialog"
+      aria-modal="true"
     >
       <div class="bg-white rounded-lg shadow-xl w-full max-w-md m-4">
         <div class="p-6">
-          <h3 class="text-xl font-semibold text-gray-900">Add New Item</h3>
+          <h3 class="text-xl font-semibold text-gray-900">Add New Inventory Item</h3>
           <p class="text-sm text-gray-500 mt-1">
-            Enter details of the new inventory item.
+            Fill out the form to register a new item in the system.
           </p>
-          <div class="mt-4 space-y-4">
+
+          <!-- Add Item Form (id="add-item-form") is handled by script.js -->
+          <form id="add-item-form" class="mt-4 space-y-4" enctype="multipart/form-data">
+            <!-- 1️⃣ Item Name -->
             <div>
-              <label
-                for="new-item-name"
-                class="block text-sm font-medium text-gray-700"
-                >Item Name</label
-              >
+              <label for="item-name" class="block text-sm font-medium text-gray-700">Item Name</label>
               <input
                 type="text"
-                id="new-item-name"
+                id="item-name"
+                name="item-name"
                 placeholder="e.g., Steel Hammer"
+                required
                 class="mt-1 block w-full h-10 rounded-lg border border-gray-300 px-3 py-2 text-sm"
               />
             </div>
+
+            <!-- 2️⃣ Category Name -->
             <div>
-              <label
-                for="new-item-category"
-                class="block text-sm font-medium text-gray-700"
-                >Category</label
-              >
+              <label for="category-name" class="block text-sm font-medium text-gray-700">Category</label>
               <input
                 type="text"
-                id="new-item-category"
-                placeholder="e.g., Tools, Paint, Cement"
+                id="category-name"
+                name="category-name"
+                placeholder="e.g., Tools, Paint, Electrical"
+                required
                 class="mt-1 block w-full h-10 rounded-lg border border-gray-300 px-3 py-2 text-sm"
               />
             </div>
+
+            <!-- 3️⃣ Initial Quantity -->
             <div>
-              <label
-                for="new-item-quantity"
-                class="block text-sm font-medium text-gray-700"
-                >Initial Quantity</label
-              >
+              <label for="initial-quantity" class="block text-sm font-medium text-gray-700">Initial Quantity</label>
               <input
                 type="number"
-                id="new-item-quantity"
-                placeholder="0"
+                id="initial-quantity"
+                name="initial-quantity"
+                min="0"
+                placeholder="Enter starting stock quantity"
+                required
+                class="mt-1 block w-full h-10 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              />
+            </div>
+
+            <!-- 4️⃣ Supplier Name -->
+            <div>
+              <label for="supplier-name" class="block text-sm font-medium text-gray-700">Supplier Name</label>
+              <input
+                type="text"
+                id="supplier-name"
+                name="supplier-name"
+                placeholder="e.g., ABC Hardware Supply"
+                required
+                class="mt-1 block w-full h-10 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              />
+            </div>
+
+            <!-- 5️⃣ Upload Image -->
+            <div>
+              <label for="item-image" class="block text-sm font-medium text-gray-700">Upload Item Image</label>
+              <input
+                type="file"
+                id="item-image"
+                name="item-image"
+                accept="image/*"
+                class="mt-1 block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer bg-gray-50"
+              />
+            </div>
+
+            <!-- 6️⃣ Date Added -->
+            <div>
+              <label for="date-added" class="block text-sm font-medium text-gray-700">Date Added</label>
+              <input
+                type="date"
+                id="date-added"
+                name="date-added"
+                required
+                class="mt-1 block w-full h-10 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+              />
+            </div>
+
+            <!-- 7️⃣ Unit -->
+            <div>
+              <label for="unit" class="block text-sm font-medium text-gray-700">Unit</label>
+              <select
+                id="unit"
+                name="unit"
+                required
+                class="mt-1 block w-full h-10 rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white"
+              >
+                <option value="">Select Unit</option>
+                <option value="pcs">pcs</option>
+                <option value="box">box</option>
+                <option value="liter">liter</option>
+                <option value="kg">kg</option>
+              </select>
+            </div>
+
+            <!-- 8️⃣ Reorder Level -->
+            <div>
+              <label for="reorder-level" class="block text-sm font-medium text-gray-700">
+                Reorder Level
+              </label>
+              <input
+                type="number"
+                id="reorder-level"
+                name="reorder-level"
+                min="1"
+                placeholder="e.g., 20"
                 class="mt-1 block w-full h-10 rounded-lg border border-gray-300 px-3 py-2 text-sm"
               />
               <p class="text-xs text-gray-500 mt-1">
-                Enter a whole number greater than or equal to 0. Items below 20
-                will be tagged as Low Stock.
+                Minimum stock before restocking is required.
               </p>
             </div>
-          </div>
+          </form>
+
+          <!-- Action Buttons -->
           <div class="mt-6 flex justify-end space-x-3">
-            <button
-              id="cancel-add-item"
-              class="h-10 px-4 text-sm font-medium rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              id="confirm-add-item"
-              class="h-10 px-4 text-sm font-semibold rounded-lg text-white bg-slate-700 hover:bg-slate-800 transition-colors"
-            >
-              Add Item
-            </button>
+            <button id="cancel-add-item" class="h-10 px-4 text-sm font-medium rounded-lg text-gray-700 border border-gray-300 hover:bg-gray-50 transition-colors">Cancel</button>
+            <button type="submit" form="add-item-form" id="confirm-add-item" class="h-10 px-4 text-sm font-semibold rounded-lg text-white bg-slate-700 hover:bg-slate-800 transition-colors">Add Item</button>
           </div>
         </div>
       </div>
     </div>
 
-    <div
-      id="stock-in-dialog"
-      class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden"
-    >
+    <!-- Stock In / Stock Out Dialogs -->
+    <!-- Used to adjust quantity for an existing inventory item (handled by script.js) -->
+    <div id="stock-in-dialog" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
       <div class="bg-white rounded-lg shadow-xl w-full max-w-md m-4">
         <div class="p-6">
           <h3 class="text-xl font-semibold text-green-700">Stock In</h3>
@@ -348,10 +530,7 @@
       </div>
     </div>
 
-    <div
-      id="stock-out-dialog"
-      class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden"
-    >
+    <div id="stock-out-dialog" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 hidden">
       <div class="bg-white rounded-lg shadow-xl w-full max-w-md m-4">
         <div class="p-6">
           <h3 class="text-xl font-semibold text-red-700">Stock Out</h3>
@@ -398,10 +577,8 @@
 
     <script src="./script.js"></script>
     <script>
-      // Initialize lucide icons after they are loaded
+      // Initialize lucide icons for all icon placeholders
       lucide.createIcons();
     </script>
   </body>
 </html>
-
-// Major Form #1 - Add Itemmm
