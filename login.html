@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E.M. Cayetano Trading - Login</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
+      background: linear-gradient(to bottom right, #fff9c4, #fff);
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
+    }
+
+    /* Left - Login Form */
+    .login-section {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      background: linear-gradient(to bottom right, #fff9c4, #fffde7);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .card img {
+      display: block;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 10px;
+    }
+
+    .card h2 {
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .card p {
+      text-align: center;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      margin-bottom: 16px;
+      font-size: 15px;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #ffeb3b;
+      box-shadow: 0 0 5px #ffeb3b;
+    }
+
+    .password-container {
+      position: relative;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #555;
+    }
+
+    /* "I'm not a robot" section */
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 18px;
+      background: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .checkbox-container input {
+      width: auto;
+      margin-right: 10px;
+      accent-color: #fdd835;
+    }
+
+    .checkbox-container label {
+      margin: 0;
+      font-weight: 500;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #ffeb3b;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #fdd835;
+    }
+
+    .links {
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+
+    .links a {
+      color: #e53935;
+      text-decoration: none;
+    }
+
+    .links a:hover {
+      text-decoration: underline;
+    }
+
+    /* Right Panel */
+    .info-section {
+      flex: 1;
+      background: linear-gradient(to bottom right, #fff9c4, #ffe0b2, #ffcdd2);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px;
+      color: #333;
+    }
+
+    .info-section h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .info-section p {
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 900px) {
+      .info-section {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Left - Login Form -->
+    <div class="login-section">
+      <div class="card">
+        <img src="EMlogo.jpg" alt="EMC Logo">
+        <h2>E.M. Cayetano Trading</h2>
+        <p>Inventory Management System</p>
+
+        <form id="loginForm">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Enter your username">
+
+          <label for="password">Password</label>
+          <div class="password-container">
+            <input type="password" id="password" placeholder="Enter your password">
+            <span class="toggle-password" onclick="togglePassword()">👁️</span>
+          </div>
+
+          <label for="branch">Branch</label>
+          <select id="branch">
+            <option value="">Select branch</option>
+            <option value="Manggahan">Manggahan</option>
+            <option value="San Rafael">San Rafael</option>
+          </select>
+
+          <!-- I'm not a robot checkbox -->
+          <div class="checkbox-container">
+            <input type="checkbox" id="notRobot">
+            <label for="notRobot">I am not a robot</label>
+          </div>
+
+          <button type="submit">Login</button>
+
+          <div class="links">
+            <a href="#" onclick="forgotPassword()">Forgot Password?</a>
+            <a href="#" onclick="register()">Create Account</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right - Info Panel -->
+    <div class="info-section">
+      <h1>E.M. Cayetano Trading</h1>
+      <div style="height: 4px; width: 100px; background: linear-gradient(to right, #ffeb3b, #f44336); border-radius: 2px;"></div>
+      <p>
+        Established in 2012, E.M. Cayetano Trading provides quality hardware and construction
+        supplies — from cement, plywood, and nails to steel bars and tools.  
+        Serving customers from our Manggahan and San Rafael branches in Rodriguez, Rizal.
+      </p>
+      <blockquote style="border-left: 4px solid #f44336; padding-left: 10px; font-style: italic; background: rgba(255,255,255,0.5); border-radius: 6px; margin-top: 15px;">
+        "Reliable, professional, and dedicated to supporting all your construction and home improvement needs."
+      </blockquote>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("loginForm");
+
+    const demoAccounts = [
+      { username: "admin", password: "admin123" },
+      { username: "employee", password: "emp123" },
+      { username: "preyes", password: "emp123" }
+    ];
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const branch = document.getElementById("branch").value;
+      const notRobot = document.getElementById("notRobot").checked;
+
+      if (!username || !password || !branch) {
+        alert("⚠️ Please fill in all fields.");
+        return;
+      }
+
+      if (!notRobot) {
+        alert("🤖 Please confirm that you are not a robot.");
+        return;
+      }
+
+      // Simulate login check
+      const user = demoAccounts.find(
+        acc => acc.username.toLowerCase() === username.toLowerCase() && acc.password === password
+      );
+
+      if (!user) {
+        alert("❌ Invalid username or password.");
+        return;
+      }
+
+      alert(`✅ Welcome ${username}! Redirecting to 2FA verification...`);
+      // In a real app, redirect to next page
+    });
+
+    function togglePassword() {
+      const passwordInput = document.getElementById("password");
+      passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+    }
+
+    function forgotPassword() {
+      alert("🔑 Forgot Password functionality coming soon.");
+    }
+
+    function register() {
+      alert("📝 Redirecting to registration page...");
+    }
+  </script>
+</body>
+</html>

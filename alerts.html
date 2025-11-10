@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alerts & Notifications</title>
+  <style>
+    * { box-sizing: border-box; font-family: "Poppins", sans-serif; }
+    body { background: #f9fafb; padding: 40px; color: #1e293b; position: relative; }
+
+    h1 { font-size: 28px; margin-bottom: 8px; }
+    h2 { font-size: 20px; margin: 0; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      padding: 16px 20px;
+    }
+
+    .card p { margin: 0; color: #64748b; }
+    .card .count { font-size: 24px; font-weight: 600; margin-top: 4px; }
+
+    .tabs { display: flex; gap: 10px; margin-bottom: 16px; }
+    .tabs button {
+      padding: 8px 16px;
+      border: 1px solid #cbd5e1;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .tabs button.active { background: #2563eb; color: white; border-color: #2563eb; }
+
+    .alert-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      background: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .alert-info { background: #eff6ff; border-color: #bfdbfe; }
+    .alert-warning { background: #fff7ed; border-color: #fed7aa; }
+    .alert-success { background: #ecfdf5; border-color: #a7f3d0; }
+
+    .alert-card h4 {
+      margin: 0 0 4px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .alert-card p { margin: 0; color: #475569; font-size: 14px; }
+    .alert-card .time { color: #94a3b8; font-size: 12px; margin-top: 6px; }
+
+    .buttons { display: flex; gap: 6px; margin-top: 6px; }
+    button.small {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-mark { background: #e0f2fe; color: #0369a1; }
+    .btn-view { background: #bbf7d0; color: #166534; }
+    .btn-dismiss { background: #fee2e2; color: #b91c1c; }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .mark-all {
+      padding: 8px 14px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* Back button */
+    #backBtn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px 24px;
+      border-radius: 12px;
+      width: 320px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal h3 { margin-top: 0; font-size: 20px; }
+    .close-btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      margin-top: 16px;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+<body>
+
+  <button id="backBtn">← Back</button>
+
+  <h1>Alerts & Notifications</h1>
+  <p>Stay updated with important system events and real-time inventory alerts</p>
+
+  <!-- Stats -->
+  <div class="grid">
+    <div class="card"><p>Total Alerts</p><div class="count" id="totalCount">0</div></div>
+    <div class="card"><p>Unread</p><div class="count" id="unreadCount">0</div></div>
+    <div class="card"><p>Warnings</p><div class="count" id="warningCount">0</div></div>
+    <div class="card"><p>Info</p><div class="count" id="infoCount">0</div></div>
+  </div>
+
+  <div class="header">
+    <h2>Notifications</h2>
+    <button class="mark-all" id="markAll">Mark All as Read</button>
+  </div>
+
+  <div class="tabs">
+    <button class="active" data-tab="all">All</button>
+    <button data-tab="unread">Unread</button>
+    <button data-tab="warnings">Warnings</button>
+  </div>
+
+  <div id="alertsList"></div>
+
+  <!-- Modal -->
+  <div id="alertModal" class="modal">
+    <div class="modal-content">
+      <h3 id="modalTitle"></h3>
+      <p id="modalMessage"></p>
+      <small id="modalType"></small><br>
+      <small id="modalTime" style="color:#64748b"></small>
+      <br>
+      <button class="close-btn" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const alerts = [
+      { id: 1, type: "info", title: "System Backup Reminder", message: "It's been 3 days since the last system backup", timestamp: "1 day ago", read: false },
+      { id: 2, type: "warning", title: "Low Stock Alert", message: "Printer ink is running low (5 units left)", timestamp: "Just now", read: false },
+      { id: 3, type: "success", title: "Backup Complete", message: "Your system backup completed successfully", timestamp: "2 hours ago", read: true },
+    ];
+
+    const alertsList = document.getElementById("alertsList");
+    const totalCount = document.getElementById("totalCount");
+    const unreadCount = document.getElementById("unreadCount");
+    const warningCount = document.getElementById("warningCount");
+    const infoCount = document.getElementById("infoCount");
+    const markAllBtn = document.getElementById("markAll");
+    const modal = document.getElementById("alertModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalMessage = document.getElementById("modalMessage");
+    const modalType = document.getElementById("modalType");
+    const modalTime = document.getElementById("modalTime");
+
+    // Back button shows popup
+    document.getElementById("backBtn").addEventListener("click", () => {
+      modalTitle.textContent = "Back Button Clicked";
+      modalMessage.textContent = "You went back yay";
+      modalType.textContent = "";
+      modalTime.textContent = "";
+      modal.style.display = "flex";
+    });
+
+    function updateCounts() {
+      totalCount.textContent = alerts.length;
+      unreadCount.textContent = alerts.filter(a => !a.read).length;
+      warningCount.textContent = alerts.filter(a => a.type === "warning").length;
+      infoCount.textContent = alerts.filter(a => a.type === "info").length;
+    }
+
+    function renderAlerts(filter = "all") {
+      alertsList.innerHTML = "";
+
+      let filtered = alerts;
+      if (filter === "unread") filtered = alerts.filter(a => !a.read);
+      if (filter === "warnings") filtered = alerts.filter(a => a.type === "warning");
+
+      if (filtered.length === 0) {
+        alertsList.innerHTML = `<p style="text-align:center; color:#94a3b8; padding:20px;">No alerts to display</p>`;
+        return;
+      }
+
+      filtered.forEach(a => {
+        const div = document.createElement("div");
+        div.className = `alert-card alert-${a.type}`;
+        div.innerHTML = `
+          <div>
+            <h4>${a.title} ${!a.read ? '<span style="color:#2563eb;font-size:12px;">(New)</span>' : ''}</h4>
+            <p>${a.message}</p>
+            <div class="time">${a.timestamp}</div>
+            <div class="buttons">
+              ${!a.read ? `<button class="small btn-mark" onclick="markAsRead(${a.id})">Mark as Read</button>` : ""}
+              <button class="small btn-view" onclick="viewAlert(${a.id})">View</button>
+              <button class="small btn-dismiss" onclick="dismissAlert(${a.id})">Dismiss</button>
+            </div>
+          </div>
+        `;
+        alertsList.appendChild(div);
+      });
+    }
+
+    function markAsRead(id) {
+      const alert = alerts.find(a => a.id === id);
+      if (alert) alert.read = true;
+      updateCounts();
+      renderAlerts(currentTab);
+    }
+
+    function dismissAlert(id) {
+      const index = alerts.findIndex(a => a.id === id);
+      if (index !== -1) alerts.splice(index, 1);
+      updateCounts();
+      renderAlerts(currentTab);
+    }
+
+    function viewAlert(id) {
+      const alert = alerts.find(a => a.id === id);
+      if (!alert) return;
+      modalTitle.textContent = alert.title;
+      modalMessage.textContent = alert.message;
+      modalType.textContent = `Type: ${alert.type}`;
+      modalTime.textContent = `Time: ${alert.timestamp}`;
+      modal.style.display = "flex";
+    }
+
+    function closeModal() {
+      modal.style.display = "none";
+    }
+
+    window.onclick = function(e) {
+      if (e.target === modal) closeModal();
+    }
+
+    markAllBtn.addEventListener("click", () => {
+      alerts.forEach(a => a.read = true);
+      updateCounts();
+      renderAlerts(currentTab);
+    });
+
+    let currentTab = "all";
+    document.querySelectorAll(".tabs button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentTab = btn.dataset.tab;
+        renderAlerts(currentTab);
+      });
+    });
+
+    updateCounts();
+    renderAlerts();
+  </script>
+
+</body>
+</html>
